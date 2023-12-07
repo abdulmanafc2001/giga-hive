@@ -1,7 +1,8 @@
-package controllers
+package usercontrollers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/abdulmanafc2001/gigahive/database"
 	"github.com/abdulmanafc2001/gigahive/helpers"
@@ -9,7 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
-// declaring a global variable
+
+// declaring a global variable for validation
 var (
 	validate = validator.New()
 )
@@ -65,19 +67,75 @@ func UserSignup(c *gin.Context) {
 		})
 		return
 	}
+	// getting otp
+	otp := helpers.GenerateOtp()
 	// creating the new user
 	if err := database.DB.Create(&models.User{
 		First_Name: input.First_Name,
 		Last_Name:  input.Last_Name,
 		User_Name:  input.User_Name,
 		Email:      input.Email,
+		Phone:      input.Phone,
 		Password:   string(ps),
+		Otp:        otp,
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to add data",
 		})
 		return
 	}
+	// sending the otp to specified email address
+	if err = helpers.SendOtp(strconv.Itoa(otp), input.Email); err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to send otp",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": "otp send to " + input.Email,
+	})
+}
+
+type OtpVerifiaction struct {
+	Email string `json:"email"`
+	Otp   int    `json:"otp"`
+}
+
+// otp verification function ------------------------------------------------------------------>
+func OtpVerification(c *gin.Context) {
+	// otp and geting from user
+	var otp OtpVerifiaction
+	if err := c.Bind(&otp); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to get data",
+		})
+		return
+	}
+
+	var user models.User
+	if err := database.DB.Where("email = ?", otp.Email).First(&user).Error; err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to find user",
+		})
+		return
+	}
+	// checking the user already validate or not.
+	if user.Validate {
+		c.JSON(400, gin.H{
+			"error": "User already verified",
+		})
+		return
+	}
+	// checking the otp correct or not.
+	if otp.Otp != user.Otp {
+		c.JSON(400, gin.H{
+			"error": "Otp verification failed, check your otp",
+		})
+		return
+	}
+	// if the otp is correct the value in database validate column is updating to true
+	database.DB.Model(&models.User{}).Where("id = ?", user.Id).Update("validate", true)
 	c.JSON(200, gin.H{
 		"success": "successfully created user",
 	})
