@@ -16,7 +16,22 @@ var (
 	validate = validator.New()
 )
 
+
+
 // This user signup handler function ------------------------------------------------------->
+
+// Signup registers a new user.
+// @Summary Register a new user
+// @Description Register a new user with the provided information.
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param user body models.User true "User registration information"
+// @Success 200 {json} SuccessfulResponse "User registration successful"
+// @Failure 400 {json} ErrorResponse "Bad request"
+// @Failure 409 {json} ErrorResponse "Conflict - Username or phone number already exists"
+// @Failure 500 {json} ErrorResponse "Internal server error"
+// @Router /user/signup [post]
 func UserSignup(c *gin.Context) {
 	var input models.User
 	if err := c.Bind(&input); err != nil {
@@ -56,6 +71,14 @@ func UserSignup(c *gin.Context) {
 	if user.Email == input.Email {
 		c.JSON(400, gin.H{
 			"error": "This email already exist",
+		})
+		return
+	}
+	// checking the username already exist in database
+	database.DB.Where("user_name = ?", input.User_Name).First(&user)
+	if user.User_Name == input.User_Name {
+		c.JSON(400, gin.H{
+			"error": "This username already exist",
 		})
 		return
 	}
@@ -138,5 +161,47 @@ func OtpVerification(c *gin.Context) {
 	database.DB.Model(&models.User{}).Where("id = ?", user.Id).Update("validate", true)
 	c.JSON(200, gin.H{
 		"success": "successfully created user",
+	})
+}
+
+// login function ------------------------------------------------------------------------------>
+func Login(c *gin.Context) {
+	var input models.Login
+	if err := c.Bind(&input); err != nil {
+		c.JSON(500, gin.H{
+			"error": "Find to get values",
+		})
+		return
+	}
+
+	var user models.User
+	if err := database.DB.Where("user_name = ? OR email = ?", input.UserName, input.UserName).First(&user).Error; err != nil {
+		c.JSON(401, gin.H{
+			"error": "incorrect username and password",
+		})
+		return
+	}
+	// checking password if password is wrong it will return error
+	if err := helpers.CheckPassword(user.Password, input.Password); err != nil {
+		c.JSON(401, gin.H{
+			"error": "incorrect username and password",
+		})
+		return
+	}
+	// Genetated token using jwt
+	token, err := helpers.GenerateJWT(user.Id)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to generate token",
+		})
+		return
+	}
+	// seting token into browser
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("user_token", token, 3600*24, "", "", false, true)
+
+	c.JSON(200, gin.H{
+		"success": "Login successfull",
+		"token":   token,
 	})
 }

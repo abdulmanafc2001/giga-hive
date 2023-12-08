@@ -1,0 +1,75 @@
+basePath: /
+definitions:
+  models.User:
+    properties:
+      email:
+        type: string
+      firstname:
+        maxLength: 20
+        minLength: 4
+        type: string
+      id:
+        type: integer
+      isblocked:
+        type: boolean
+      lastname:
+        maxLength: 20
+        minLength: 4
+        type: string
+      otp:
+        type: integer
+      password:
+        type: string
+      phone:
+        maxLength: 10
+        minLength: 10
+        type: string
+      username:
+        maxLength: 20
+        minLength: 4
+        type: string
+      validate:
+        type: boolean
+    type: object
+host: localhost:7000
+info:
+  contact: {}
+  description: Freelance application API in go using Gin frame work
+  title: GigaHive
+  version: "1.0"
+paths:
+  /user/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the provided information.
+      parameters:
+      - description: User registration information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User registration successful
+          schema:
+            type: json
+        "400":
+          description: Bad request
+          schema:
+            type: json
+        "409":
+          description: Conflict - Username or phone number already exists
+          schema:
+            type: json
+        "500":
+          description: Internal server error
+          schema:
+            type: json
+      summary: Register a new user
+      tags:
+      - authentication
+swagger: "2.0"

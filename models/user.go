@@ -12,3 +12,7 @@ type User struct {
 	Otp        int    `json:"otp" gorm:"not null"`
 	Validate   bool   `json:"validate" gorm:"default:false"`
 }
+type Login struct {
+	UserName string `json:"username"`
+	Password string `json:"password"`
+}
