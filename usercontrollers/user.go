@@ -126,6 +126,19 @@ type OtpVerifiaction struct {
 }
 
 // otp verification function ------------------------------------------------------------------>
+
+// Signup Otp verification.
+// @Summary Otp verfication of a new user
+// @Description Otp verification with email id.
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param user body OtpVerifiaction true "User registration information"
+// @Success 200 {json} SuccessfulResponse "User registration successful"
+// @Failure 400 {json} ErrorResponse "Bad request"
+// @Failure 409 {json} ErrorResponse "Conflict - Username or phone number already exists"
+// @Failure 500 {json} ErrorResponse "Internal server error"
+// @Router /user/signup/otpverification [post]
 func OtpVerification(c *gin.Context) {
 	// otp and geting from user
 	var otp OtpVerifiaction
@@ -165,6 +178,18 @@ func OtpVerification(c *gin.Context) {
 }
 
 // login function ------------------------------------------------------------------------------>
+
+// Login handles user authentication by validating credentials and generating a JWT token upon successful login.
+// @Summary User login
+// @Description Authenticate user with provided credentials and generate JWT token
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param user body models.Login true "User login information"
+// @Success 200 {json} SuccessfulResponse "Login successful"
+// @Failure 401 {json} ErrorResponse "Unauthorized - Incorrect username or password"
+// @Failure 500 {json} ErrorResponse "Internal server error"
+// @Router /user/login [post]
 func Login(c *gin.Context) {
 	var input models.Login
 	if err := c.Bind(&input); err != nil {

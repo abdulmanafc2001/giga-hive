@@ -18,6 +18,6 @@ func ConnectToDB() {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	log.Printf("successfully connected to database: %v/n", DB.Name())
+	log.Printf("successfully connected to database: %v \n", DB.Name())
 	DB.AutoMigrate(&models.User{})
 }

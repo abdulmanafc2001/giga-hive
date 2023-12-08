@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  models.Login:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   models.User:
     properties:
       email:
@@ -31,6 +38,13 @@ definitions:
       validate:
         type: boolean
     type: object
+  usercontrollers.OtpVerifiaction:
+    properties:
+      email:
+        type: string
+      otp:
+        type: integer
+    type: object
 host: localhost:7000
 info:
   contact: {}
@@ -38,6 +52,36 @@ info:
   title: GigaHive
   version: "1.0"
 paths:
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with provided credentials and generate JWT token
+      parameters:
+      - description: User login information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            type: json
+        "401":
+          description: Unauthorized - Incorrect username or password
+          schema:
+            type: json
+        "500":
+          description: Internal server error
+          schema:
+            type: json
+      summary: User login
+      tags:
+      - authentication
   /user/signup:
     post:
       consumes:
@@ -70,6 +114,40 @@ paths:
           schema:
             type: json
       summary: Register a new user
+      tags:
+      - authentication
+  /user/signup/otpverification:
+    post:
+      consumes:
+      - application/json
+      description: Otp verification with email id.
+      parameters:
+      - description: User registration information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/usercontrollers.OtpVerifiaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User registration successful
+          schema:
+            type: json
+        "400":
+          description: Bad request
+          schema:
+            type: json
+        "409":
+          description: Conflict - Username or phone number already exists
+          schema:
+            type: json
+        "500":
+          description: Internal server error
+          schema:
+            type: json
+      summary: Otp verfication of a new user
       tags:
       - authentication
 swagger: "2.0"

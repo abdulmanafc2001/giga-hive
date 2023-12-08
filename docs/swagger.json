@@ -9,6 +9,52 @@
     "host": "localhost:7000",
     "basePath": "/",
     "paths": {
+        "/user/login": {
+            "post": {
+                "description": "Authenticate user with provided credentials and generate JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "User login information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Incorrect username or password",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
         "/user/signup": {
             "post": {
                 "description": "Register a new user with the provided information.",
@@ -60,9 +106,72 @@
                     }
                 }
             }
+        },
+        "/user/signup/otpverification": {
+            "post": {
+                "description": "Otp verification with email id.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Otp verfication of a new user",
+                "parameters": [
+                    {
+                        "description": "User registration information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usercontrollers.OtpVerifiaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User registration successful",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - Username or phone number already exists",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "models.Login": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "models.User": {
             "type": "object",
             "properties": {
@@ -103,6 +212,17 @@
                 },
                 "validate": {
                     "type": "boolean"
+                }
+            }
+        },
+        "usercontrollers.OtpVerifiaction": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "integer"
                 }
             }
         }
