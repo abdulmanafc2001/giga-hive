@@ -52,6 +52,36 @@ info:
   title: GigaHive
   version: "1.0"
 paths:
+  /admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with provided credentials and generate JWT token
+      parameters:
+      - description: admin login information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            type: json
+        "401":
+          description: Unauthorized - Incorrect username or password
+          schema:
+            type: json
+        "500":
+          description: Internal server error
+          schema:
+            type: json
+      summary: Admin login
+      tags:
+      - adminauthentication
   /user/login:
     post:
       consumes:

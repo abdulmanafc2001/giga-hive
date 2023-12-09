@@ -9,6 +9,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
+// Login handles admin authentication by validating credentials and generating a JWT token upon successful login.
+// @Summary Admin login
+// @Description Authenticate user with provided credentials and generate JWT token
+// @Tags adminauthentication
+// @Accept json
+// @Produce json
+// @Param user body models.Login true "admin login information"
+// @Success 200 {json} SuccessfulResponse "Login successful"
+// @Failure 401 {json} ErrorResponse "Unauthorized - Incorrect username or password"
+// @Failure 500 {json} ErrorResponse "Internal server error"
+// @Router /admin/login [post]
 func Login(c *gin.Context) {
 	var input models.Login
 	if err := c.Bind(&input); err != nil {
