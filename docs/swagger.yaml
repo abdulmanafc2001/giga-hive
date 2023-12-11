@@ -82,6 +82,61 @@ paths:
       summary: Admin login
       tags:
       - adminauthentication
+  /admin/user/block:
+    patch:
+      consumes:
+      - application/json
+      description: Block a user by updating the 'is_blocked' field in the database
+      parameters:
+      - description: User ID to block
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully blocked user
+          schema:
+            type: json
+        "400":
+          description: Failed to find user" or "User already blocked" or "Failed to
+            block user
+          schema:
+            type: json
+      security:
+      - ApiKeyAuth: []
+      summary: Block a user
+      tags:
+      - users
+  /admin/user/list:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all users
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+      security:
+      - ApiKeyAuth: []
+      summary: List users
+      tags:
+      - admin
   /user/login:
     post:
       consumes:

@@ -16,8 +16,6 @@ var (
 	validate = validator.New()
 )
 
-
-
 // This user signup handler function ------------------------------------------------------->
 
 // Signup registers a new user.
@@ -203,6 +201,13 @@ func Login(c *gin.Context) {
 	if err := database.DB.Where("user_name = ? OR email = ?", input.UserName, input.UserName).First(&user).Error; err != nil {
 		c.JSON(401, gin.H{
 			"error": "incorrect username and password",
+		})
+		return
+	}
+	// checking user status if user is blocked they cannot login
+	if user.IsBlocked {
+		c.JSON(400, gin.H{
+			"error": "User is blocked",
 		})
 		return
 	}
