@@ -8,4 +8,5 @@ import (
 func FreelancerRoutes(router *gin.Engine) {
 	r := router.Group("/freelancer")
 	r.POST("/signup",controllers.FreelancerSignup)
+	r.POST("/signup/validate",controllers.ValidateOTP)
 }

@@ -85,6 +85,7 @@ func FreelancerSignup(c *gin.Context) {
 		Full_Name:     input.Full_Name,
 		User_Name:     input.User_Name,
 		Email:         input.Email,
+		Phone:         input.Phone,
 		Password:      input.Password,
 		Qualification: input.Qualification,
 		Tools:         input.Tools,
@@ -99,4 +100,32 @@ func FreelancerSignup(c *gin.Context) {
 		"success": "email sent to your email",
 	})
 
+}
+
+func ValidateOTP(c *gin.Context) {
+	var input struct {
+		Email string `json:"email"`
+		OTP   string `json:"otp"`
+	}
+	if err := c.Bind(&input); err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to get data",
+		})
+		return
+	}
+
+	var freelancer models.Freelancer
+	if err := database.DB.Where("email = ? AND otp = ?", input.Email, input.OTP).First(&freelancer).Error; err != nil {
+		c.JSON(400, gin.H{
+			"error": "Incorrect user name and otp try again",
+		})
+		return
+	}
+	if err := database.DB.Model(&models.Freelancer{}).Where("email = ?", input.Email).Update("validate", true).Error; err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to update validate",
+		})
+		return
+	}
+	c.JSON(200, gin.H{"success": "Successfully validate freelancer"})
 }
