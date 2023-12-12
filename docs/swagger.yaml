@@ -1,5 +1,34 @@
 basePath: /
 definitions:
+  models.Freelancer:
+    properties:
+      email:
+        type: string
+      fullname:
+        maxLength: 20
+        minLength: 4
+        type: string
+      id:
+        type: integer
+      isblocked:
+        type: boolean
+      otp:
+        type: string
+      password:
+        maxLength: 20
+        minLength: 4
+        type: string
+      qualification:
+        type: string
+      tools:
+        type: string
+      username:
+        maxLength: 20
+        minLength: 4
+        type: string
+      validate:
+        type: boolean
+    type: object
   models.Login:
     properties:
       password:
@@ -137,6 +166,40 @@ paths:
       summary: List users
       tags:
       - admin
+  /freelancer/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new freelancer with the provided information.
+      parameters:
+      - description: freelancer registration information
+        in: body
+        name: freelancer
+        required: true
+        schema:
+          $ref: '#/definitions/models.Freelancer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User registration successful
+          schema:
+            type: json
+        "400":
+          description: Bad request
+          schema:
+            type: json
+        "409":
+          description: Conflict - Username or phone number already exists
+          schema:
+            type: json
+        "500":
+          description: Internal server error
+          schema:
+            type: json
+      summary: Register a new freelancer
+      tags:
+      - freelancer
   /user/login:
     post:
       consumes:

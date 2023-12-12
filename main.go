@@ -31,5 +31,6 @@ func main() {
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	routes.UserRoutes(router)
 	routes.AdminRoutes(router)
+	routes.FreelancerRoutes(router)
 	router.Run(":7000")
 }

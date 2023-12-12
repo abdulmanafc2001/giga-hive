@@ -90,6 +90,13 @@ func UserSignup(c *gin.Context) {
 	}
 	// getting otp
 	otp := helpers.GenerateOtp()
+
+	if err = helpers.SendOtp(strconv.Itoa(otp), input.Email); err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to send otp",
+		})
+		return
+	}
 	// creating the new user
 	if err := database.DB.Create(&models.User{
 		First_Name: input.First_Name,
@@ -106,12 +113,6 @@ func UserSignup(c *gin.Context) {
 		return
 	}
 	// sending the otp to specified email address
-	if err = helpers.SendOtp(strconv.Itoa(otp), input.Email); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to send otp",
-		})
-		return
-	}
 
 	c.JSON(200, gin.H{
 		"success": "otp send to " + input.Email,

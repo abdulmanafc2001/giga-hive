@@ -12,6 +12,18 @@ import (
 
 var validate = validator.New()
 
+// Signup registers a new freelancer.
+// @Summary Register a new freelancer
+// @Description Register a new freelancer with the provided information.
+// @Tags freelancer
+// @Accept json
+// @Produce json
+// @Param freelancer body models.Freelancer true "freelancer registration information"
+// @Success 200 {json} SuccessfulResponse "User registration successful"
+// @Failure 400 {json} ErrorResponse "Bad request"
+// @Failure 409 {json} ErrorResponse "Conflict - Username or phone number already exists"
+// @Failure 500 {json} ErrorResponse "Internal server error"
+// @Router /freelancer/signup [post]
 func FreelancerSignup(c *gin.Context) {
 	var input models.Freelancer
 	if err := c.Bind(&input); err != nil {
@@ -26,17 +38,17 @@ func FreelancerSignup(c *gin.Context) {
 		})
 	}
 
-	var user models.User
-	database.DB.Where("email = ?", input.Email).First(&user)
-	if user.Email == input.Email {
+	var freelancer models.Freelancer
+	database.DB.Where("email = ?", input.Email).First(&freelancer)
+	if freelancer.Email == input.Email {
 		c.JSON(400, gin.H{
 			"error": "This email already exist",
 		})
 		return
 	}
 	// checking the username already exist in database
-	database.DB.Where("user_name = ?", input.User_Name).First(&user)
-	if user.User_Name == input.User_Name {
+	database.DB.Where("user_name = ?", input.User_Name).First(&freelancer)
+	if freelancer.User_Name == input.User_Name {
 		c.JSON(400, gin.H{
 			"error": "This username already exist",
 		})

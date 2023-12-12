@@ -147,6 +147,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/freelancer/signup": {
+            "post": {
+                "description": "Register a new freelancer with the provided information.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "freelancer"
+                ],
+                "summary": "Register a new freelancer",
+                "parameters": [
+                    {
+                        "description": "freelancer registration information",
+                        "name": "freelancer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Freelancer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User registration successful",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - Username or phone number already exists",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
         "/user/login": {
             "post": {
                 "description": "Authenticate user with provided credentials and generate JWT token",
@@ -299,6 +351,47 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Freelancer": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 4
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isblocked": {
+                    "type": "boolean"
+                },
+                "otp": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 4
+                },
+                "qualification": {
+                    "type": "string"
+                },
+                "tools": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 4
+                },
+                "validate": {
+                    "type": "boolean"
+                }
+            }
+        },
         "models.Login": {
             "type": "object",
             "properties": {
