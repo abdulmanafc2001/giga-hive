@@ -147,6 +147,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/freelancer/login": {
+            "post": {
+                "description": "Authenticate user with provided credentials and generate JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "freelancer"
+                ],
+                "summary": "Freelancer login",
+                "parameters": [
+                    {
+                        "description": "User login information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Incorrect username or password",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
         "/freelancer/signup": {
             "post": {
                 "description": "Register a new freelancer with the provided information.",
@@ -168,6 +214,58 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.Freelancer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User registration successful",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - Username or phone number already exists",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/freelancer/signup/otpverification": {
+            "post": {
+                "description": "Otp verification with email id.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "freelancer"
+                ],
+                "summary": "Otp verfication of a new freelancer",
+                "parameters": [
+                    {
+                        "description": "User registration information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/freelancercontrollers.OtpVerifiaction"
                         }
                     }
                 ],
@@ -351,6 +449,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "freelancercontrollers.OtpVerifiaction": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Freelancer": {
             "type": "object",
             "properties": {
@@ -375,6 +484,11 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 4
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 10
                 },
                 "qualification": {
                     "type": "string"

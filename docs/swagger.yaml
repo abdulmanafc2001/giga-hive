@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  freelancercontrollers.OtpVerifiaction:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    type: object
   models.Freelancer:
     properties:
       email:
@@ -17,6 +24,10 @@ definitions:
       password:
         maxLength: 20
         minLength: 4
+        type: string
+      phone:
+        maxLength: 10
+        minLength: 10
         type: string
       qualification:
         type: string
@@ -166,6 +177,36 @@ paths:
       summary: List users
       tags:
       - admin
+  /freelancer/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with provided credentials and generate JWT token
+      parameters:
+      - description: User login information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            type: json
+        "401":
+          description: Unauthorized - Incorrect username or password
+          schema:
+            type: json
+        "500":
+          description: Internal server error
+          schema:
+            type: json
+      summary: Freelancer login
+      tags:
+      - freelancer
   /freelancer/signup:
     post:
       consumes:
@@ -198,6 +239,40 @@ paths:
           schema:
             type: json
       summary: Register a new freelancer
+      tags:
+      - freelancer
+  /freelancer/signup/otpverification:
+    post:
+      consumes:
+      - application/json
+      description: Otp verification with email id.
+      parameters:
+      - description: User registration information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/freelancercontrollers.OtpVerifiaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User registration successful
+          schema:
+            type: json
+        "400":
+          description: Bad request
+          schema:
+            type: json
+        "409":
+          description: Conflict - Username or phone number already exists
+          schema:
+            type: json
+        "500":
+          description: Internal server error
+          schema:
+            type: json
+      summary: Otp verfication of a new freelancer
       tags:
       - freelancer
   /user/login:
