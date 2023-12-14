@@ -22,3 +22,7 @@ func ShowAllBids(c *gin.Context) {
 		"bids": bids,
 	})
 }
+
+func AuctionForBid(c *gin.Context) {
+	
+}
