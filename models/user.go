@@ -27,3 +27,9 @@ type UserList struct {
 	IsBlocked  bool   `json:"isblocked" gorm:"default:false"`
 	Validate   bool   `json:"validate" gorm:"default:false"`
 }
+
+type CPassword struct {
+	OldPassword     string `json:"oldpassword"`
+	NewPassword     string `json:"newpassword"`
+	ConfirmPassword string `json:"confirmpassword"`
+}

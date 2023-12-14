@@ -12,17 +12,17 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func FreelancerAuthentication(c *gin.Context) {
-	tokenStr, err := c.Cookie("freelancer_jwt")
+func UserAuthentication(c *gin.Context) {
+	tokenString, err := c.Cookie("user_token")
 	if err != nil {
-		c.JSON(401, gin.H{
-			"error": "Failed to get token",
+		c.JSON(400, gin.H{
+			"error": "Failed to get token string",
 		})
 		c.Abort()
 		return
 	}
 
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -31,7 +31,7 @@ func FreelancerAuthentication(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(500, gin.H{
-			"error": "error occurse while token generation",
+			"error": "error occurse while token parsing",
 		})
 		c.AbortWithStatus(401)
 		return
@@ -41,13 +41,13 @@ func FreelancerAuthentication(c *gin.Context) {
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
 			c.AbortWithStatus(http.StatusUnauthorized)
 		}
-		var freelancer models.Freelancer
-		database.DB.First(&freelancer, claims["sub"])
+		var user models.User
+		database.DB.First(&user, claims["sub"])
 
-		if freelancer.IsBlocked {
+		if user.IsBlocked {
 			c.AbortWithStatus(401)
 		}
-		c.Set("freelancer", freelancer)
+		c.Set("user", user)
 
 		c.Next()
 	} else {

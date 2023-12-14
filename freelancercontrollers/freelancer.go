@@ -248,17 +248,11 @@ func GetProfile(c *gin.Context) {
 	})
 }
 
-type CPassword struct {
-	OldPassword     string `json:"oldpassword"`
-	NewPassword     string `json:"newpassword"`
-	ConfirmPassword string `json:"confirmpassword"`
-}
-
 func ChangePassword(c *gin.Context) {
 	frlncr, _ := c.Get("freelancer")
 	id := frlncr.(models.Freelancer).Id
 
-	var input CPassword
+	var input models.CPassword
 	if err := c.Bind(&input); err != nil {
 		c.JSON(400, gin.H{
 			"error": "failed to get data",
@@ -295,5 +289,14 @@ func ChangePassword(c *gin.Context) {
 		return
 	}
 
-	database.DB.Model(&models.Freelancer{}).Where("id = ?", id).Update("password", string(pswd))
+	if err := database.DB.Model(&models.Freelancer{}).Where("id = ?", id).Update("password", string(pswd)).Error; err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to update password",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "Successfully updated password",
+	})
 }
