@@ -14,6 +14,7 @@ func FreelancerRoutes(router *gin.Engine) {
 		r.POST("/login", controllers.Login)
 		r.GET("/profile", middleware.FreelancerAuthentication, controllers.GetProfile)
 		r.PUT("/profile/changepassword", middleware.FreelancerAuthentication, controllers.ChangePassword)
+		r.GET("/bid/showallbid", middleware.FreelancerAuthentication, controllers.ShowAllBids)
 	}
 
 }

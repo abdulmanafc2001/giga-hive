@@ -3,6 +3,7 @@ package usercontrollers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/abdulmanafc2001/gigahive/database"
 	"github.com/abdulmanafc2001/gigahive/helpers"
@@ -234,5 +235,47 @@ func Login(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"success": "Login successfull",
 		"token":   token,
+	})
+}
+
+type bid struct {
+	Description  string `json:"description"`
+	About        string `json:"about"`
+	PriceRange   string `json:"pricerange"`
+	ExpectedDays string `json:"expecteddays"`
+	EndDay       int    `json:"endday"`
+}
+
+func CreateBid(c *gin.Context) {
+	usr, _ := c.Get("user")
+	id := usr.(models.User).Id
+
+	var input bid
+	if err := c.Bind(&input); err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to get body",
+		})
+		return
+	}
+
+	endingDate := time.Now().Add(time.Hour * 24 * time.Duration(input.EndDay))
+	endDate := endingDate.Format("2006-01-02")
+
+	if err := database.DB.Create(&models.Bid{
+		Description:  input.Description,
+		About:        input.About,
+		PriceRange:   input.PriceRange,
+		ExpectedDays: input.ExpectedDays,
+		User_Id:      id,
+		EndDay:       endDate,
+	}).Error; err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to create bid",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": "Successfully created new bid",
 	})
 }
