@@ -279,3 +279,35 @@ func CreateBid(c *gin.Context) {
 		"success": "Successfully created new bid",
 	})
 }
+
+type AuctionDetail struct {
+	Id            int    `json:"id" gorm:"primaryKey"`
+	BidId         int    `json:"bidid"`
+	AuctionAmount string `json:"auctionamount"`
+	Full_Name     string `json:"fullname"`
+	Description   string `json:"description"`
+	About         string `json:"about"`
+	PriceRange    string `json:"pricerange"`
+	ExpectedDays  string `json:"expecteddays"`
+	EndDay        string `json:"endday"`
+}
+
+func GetAuctionedBid(c *gin.Context) {
+	usr, _ := c.Get("user")
+	id := usr.(models.User).Id
+
+	var auctions []AuctionDetail
+	if err := database.DB.Table("auctions").Select("auctions.id,auctions.bid_id,auctions.auction_amount,freelancers.full_name,bids.description,bids.about,bids.price_range,bids.expected_days,bids.end_day").
+		Joins("INNER JOIN freelancers ON freelancers.id=auctions.freelancer_id").
+		Joins("INNER JOIN bids ON bids.id=auctions.bid_id").Where("bids.user_id=?", id).Scan(&auctions).Error; err != nil {
+		c.JSON(400, gin.H{
+			"error": "Failed to find auctioned datas",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"auctions": auctions,
+	})
+}
+

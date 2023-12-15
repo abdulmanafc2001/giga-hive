@@ -15,6 +15,7 @@ func UserRoutes(router *gin.Engine) {
 		r.GET("/profile", middleware.UserAuthentication, controllers.UserProfile)
 		r.PUT("/profile/changepassword", middleware.UserAuthentication, controllers.ChangePassword)
 		r.POST("/bid/createbid", middleware.UserAuthentication, controllers.CreateBid)
+		r.GET("/bid/auctionedbid", middleware.UserAuthentication, controllers.GetAuctionedBid)
 	}
 
 }

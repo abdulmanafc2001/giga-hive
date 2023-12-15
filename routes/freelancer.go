@@ -12,9 +12,12 @@ func FreelancerRoutes(router *gin.Engine) {
 		r.POST("/signup", controllers.FreelancerSignup)
 		r.POST("/signup/otpverification", controllers.ValidateOTP)
 		r.POST("/login", controllers.Login)
+
 		r.GET("/profile", middleware.FreelancerAuthentication, controllers.GetProfile)
 		r.PUT("/profile/changepassword", middleware.FreelancerAuthentication, controllers.ChangePassword)
+		
 		r.GET("/bid/showallbid", middleware.FreelancerAuthentication, controllers.ShowAllBids)
+		r.POST("/bid/auction", middleware.FreelancerAuthentication, controllers.AuctionForBid)
 	}
 
 }
