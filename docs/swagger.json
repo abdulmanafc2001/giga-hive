@@ -141,6 +141,92 @@
                 }
             }
         },
+        "/admin/user/unblock": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Unblock a user by updating the 'is_blocked' field in the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Unblock a user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID to nblock",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully unblocked user",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to find user\" or \"User already unblocked\" or \"Failed to unblock user",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/freelancer/bid/showallbid": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a list of all active bids with end day greater than or equal to today",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Get all active bids",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to find all datas",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
         "/freelancer/login": {
             "post": {
                 "description": "Authenticate user with provided credentials and generate JWT token",
@@ -180,6 +266,42 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/freelancer/profile": {
+            "get": {
+                "description": "Get the profile of the logged-in freelancer",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Freelancer"
+                ],
+                "summary": "Get freelancer profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "bearer \u003ctoken\u003e",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated password",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "json"
                         }
@@ -471,6 +593,9 @@
                 "isblocked": {
                     "type": "boolean"
                 },
+                "numberofratings": {
+                    "type": "integer"
+                },
                 "otp": {
                     "type": "string"
                 },
@@ -485,6 +610,9 @@
                     "minLength": 10
                 },
                 "qualification": {
+                    "type": "string"
+                },
+                "rating": {
                     "type": "string"
                 },
                 "tools": {

@@ -123,6 +123,18 @@ func BlockUser(c *gin.Context) {
 	})
 }
 
+
+// BlockUser unblock a user by updating the 'is_blocked' field in the database.
+// @Summary Unblock a user
+// @Description Unblock a user by updating the 'is_blocked' field in the database
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user_id query int true "User ID to nblock"
+// @Security ApiKeyAuth
+// @Success 200 {json} SuccessResponse "Successfully unblocked user"
+// @Failure 400 {json} ErrorResponse "Failed to find user" or "User already unblocked" or "Failed to unblock user"
+// @Router /admin/user/unblock [patch]
 func UnBlockUser(c *gin.Context) {
 	user_id, _ := strconv.Atoi(c.Query("user_id"))
 	// fetching user data for checking user already unblocked?

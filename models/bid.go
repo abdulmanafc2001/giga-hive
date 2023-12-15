@@ -9,3 +9,10 @@ type Bid struct {
 	User_Id      int    `json:"userid"`
 	EndDay       string `json:"endday"`
 }
+
+type Auction struct {
+	Id            int    `json:"id" gorm:"primaryKey"`
+	BidId         int    `json:"bidid"`
+	AuctionAmount string `json:"auctionamount"`
+	FreelancerId  int    `json:"freelancerid"`
+}

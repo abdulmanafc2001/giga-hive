@@ -227,8 +227,8 @@ type freelancer struct {
 // @Tags Freelancer
 // @Produce json
 // @Param Authorization header string true "JWT Token" default(bearer <token>)
-// @Success 200 {object} gin.H{"profile": models.Freelancer} "OK"
-// @Failure 400 {object} gin.H{"error": string} "Bad Request"
+// @Success 200 {json} SuccessfulResponse "Successfully updated password"
+// @Failure 400 {json} ErrorResponse "Bad Request"
 // @Router /freelancer/profile [get]
 func GetProfile(c *gin.Context) {
 	frlncr, _ := c.Get("freelancer")

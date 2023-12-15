@@ -19,6 +19,8 @@ definitions:
         type: integer
       isblocked:
         type: boolean
+      numberofratings:
+        type: integer
       otp:
         type: string
       password:
@@ -30,6 +32,8 @@ definitions:
         minLength: 10
         type: string
       qualification:
+        type: string
+      rating:
         type: string
       tools:
         type: string
@@ -177,6 +181,62 @@ paths:
       summary: List users
       tags:
       - admin
+  /admin/user/unblock:
+    patch:
+      consumes:
+      - application/json
+      description: Unblock a user by updating the 'is_blocked' field in the database
+      parameters:
+      - description: User ID to nblock
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully unblocked user
+          schema:
+            type: json
+        "400":
+          description: Failed to find user" or "User already unblocked" or "Failed
+            to unblock user
+          schema:
+            type: json
+      security:
+      - ApiKeyAuth: []
+      summary: Unblock a user
+      tags:
+      - users
+  /freelancer/bid/showallbid:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all active bids with end day greater than or equal
+        to today
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Failed to find all datas
+          schema:
+            type: json
+      security:
+      - ApiKeyAuth: []
+      summary: Get all active bids
+      tags:
+      - Bids
   /freelancer/login:
     post:
       consumes:
@@ -207,6 +267,30 @@ paths:
       summary: Freelancer login
       tags:
       - freelancer
+  /freelancer/profile:
+    get:
+      description: Get the profile of the logged-in freelancer
+      parameters:
+      - default: bearer <token>
+        description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated password
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+      summary: Get freelancer profile
+      tags:
+      - Freelancer
   /freelancer/signup:
     post:
       consumes:
