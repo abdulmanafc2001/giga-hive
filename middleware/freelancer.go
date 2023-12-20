@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,12 +14,10 @@ import (
 )
 
 func FreelancerAuthentication(c *gin.Context) {
-	tokenStr, err := c.Cookie("freelancer_jwt")
-	if err != nil {
-		c.JSON(401, gin.H{
-			"error": "Failed to get token",
-		})
-		c.Abort()
+	tokenStr := c.Request.Header.Get("freelancer_token")
+	if len(tokenStr) == 0 {
+		err := errors.New("autharization header not provided")
+		c.AbortWithStatusJSON(http.StatusUnauthorized, err.Error())
 		return
 	}
 

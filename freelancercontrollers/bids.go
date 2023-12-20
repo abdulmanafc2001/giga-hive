@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/abdulmanafc2001/gigahive/database"
+	"github.com/abdulmanafc2001/gigahive/helpers"
 	"github.com/abdulmanafc2001/gigahive/models"
 	"github.com/gin-gonic/gin"
 )
@@ -24,16 +25,21 @@ func ShowAllBids(c *gin.Context) {
 	current := time.Now()
 	today := current.Format("2006-01-02")
 	if err := database.DB.Where("end_day >= ?", today).Find(&bids).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find all datas",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find all datas",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
-	c.JSON(200, gin.H{
-		"bids": bids,
-	})
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       bids,
+	}
+	helpers.ResponseResult(c, resp)
 }
-
 
 func AuctionForBid(c *gin.Context) {
 	frlncr, _ := c.Get("freelancer")
@@ -41,17 +47,23 @@ func AuctionForBid(c *gin.Context) {
 
 	var auction models.Auction
 	if err := c.Bind(&auction); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get body",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get body",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	var bid models.Bid
-	if err := database.DB.Find(&bid,auction.BidId).Error; err != nil {
-		c.JSON(400,gin.H{
-			"error":"Failed to find this bid",
-		})
+	if err := database.DB.Find(&bid, auction.BidId).Error; err != nil {
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed find this bid",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
@@ -60,14 +72,23 @@ func AuctionForBid(c *gin.Context) {
 		AuctionAmount: auction.AuctionAmount,
 		FreelancerId:  id,
 	}).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to create auction for bid",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to create auction for bid",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"success": "successfull auctioned against bid",
-	})
+	// c.JSON(200, gin.H{
+	// 	"success": "successfull auctioned against bid",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully auctioned against bid",
+	}
+	helpers.ResponseResult(c, resp)
 
 }

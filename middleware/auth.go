@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,12 +12,10 @@ import (
 )
 
 func AdminAuthentication(c *gin.Context) {
-	tokenstring, err := c.Cookie("jwt_admin")
-	if err != nil {
-		c.JSON(401, gin.H{
-			"error": "token not found",
-		})
-		c.Abort()
+	tokenstring := c.Request.Header.Get("autharization")
+	if len(tokenstring) == 0 {
+		err := errors.New("autharization header not provided")
+		c.AbortWithStatusJSON(http.StatusUnauthorized,err.Error())
 		return
 	}
 	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {

@@ -1,7 +1,6 @@
 package admincontrollers
 
 import (
-	"net/http"
 	"os"
 	"strconv"
 
@@ -25,33 +24,50 @@ import (
 func Login(c *gin.Context) {
 	var input models.Login
 	if err := c.Bind(&input); err != nil {
-		c.JSON(500, gin.H{
-			"error": "Failed to geting data",
-		})
+		resp := helpers.Response{
+			StatusCode: 500,
+			Err:        "Failed to geting data",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	username, password := os.Getenv("ADMIN"), os.Getenv("ADMIN_PASSWORD")
 
 	if username != input.UserName || password != input.Password {
-		c.JSON(400, gin.H{
-			"error": "incorrect username and password",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect username and password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	token, err := helpers.GenerateJWT(0)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "token generating error",
-		})
+
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Token generating error",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("jwt_admin", token, 3600*24, "", "", false, true)
 
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       token,
+	}
+	helpers.ResponseResult(c, resp)
+}
+
+func Logout(c *gin.Context) {
+	c.SetCookie("jwt_admin", "", -1, "", "", false, true)
 	c.JSON(200, gin.H{
-		"success": "successfully login admin",
-		"token":   token,
+		"success": "successfully logout admin",
 	})
 }
 
@@ -70,15 +86,21 @@ func GetUserList(c *gin.Context) {
 	var users []models.UserList
 	// fetching all users data from database
 	if err := database.DB.Table("users").Select("id,first_name,last_name,user_name,email,phone,is_blocked,validate").Scan(&users).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find users list",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find users list",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"users": users,
-	})
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       users,
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 // BlockUser blocks a user by updating the 'is_blocked' field in the database.
@@ -98,31 +120,46 @@ func BlockUser(c *gin.Context) {
 	// fetching user data for checking user already blocked?
 	user, err := helpers.FindUserById(user_id)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find user",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find user",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if user.IsBlocked {
-		c.JSON(400, gin.H{
-			"error": "user already blocked",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "user already blocked",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// updating user is_blocked to true
 	if err := database.DB.Model(&models.User{}).Where("id = ?", user_id).
 		Update("is_blocked", "true").Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to Block user",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to Block user",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
-	c.JSON(200, gin.H{
-		"success": "Successfully blocked user",
-	})
-}
+	// c.JSON(200, gin.H{
+	// 	"success": "Successfully blocked user",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully blocked user",
+	}
+	helpers.ResponseResult(c, resp)
 
+}
 
 // BlockUser unblock a user by updating the 'is_blocked' field in the database.
 // @Summary Unblock a user
@@ -140,29 +177,44 @@ func UnBlockUser(c *gin.Context) {
 	// fetching user data for checking user already unblocked?
 	user, err := helpers.FindUserById(user_id)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find user",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find user",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
+
 		return
 	}
 
 	if !user.IsBlocked {
-		c.JSON(400, gin.H{
-			"error": "user already unblocked",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "user already unblocked",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// updating user is_blocked to true
 	if err := database.DB.Model(&models.User{}).Where("id = ?", user_id).
 		Update("is_blocked", "false").Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to Block user",
-		})
+
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to unblock user",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
-	c.JSON(200, gin.H{
-		"success": "Successfully unblocked user",
-	})
+	// c.JSON(200, gin.H{
+	// 	"success": "Successfully unblocked user",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully unblocked user",
+	}
+	helpers.ResponseResult(c, resp)
 }
-
-

@@ -1,7 +1,6 @@
 package freelancercontrollers
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/abdulmanafc2001/gigahive/database"
@@ -28,31 +27,50 @@ var validate = validator.New()
 func FreelancerSignup(c *gin.Context) {
 	var input models.Freelancer
 	if err := c.Bind(&input); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get data",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to get data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get data",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	if err := validate.Struct(input); err != nil {
-		c.JSON(400, gin.H{
-			"error": err.Error(),
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": err.Error(),
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        err.Error(),
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
+		return
 	}
 
 	var freelancer models.Freelancer
 	database.DB.Where("email = ?", input.Email).First(&freelancer)
 	if freelancer.Email == input.Email {
-		c.JSON(400, gin.H{
-			"error": "This email already exist",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "This email already exist",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// checking the username already exist in database
 	database.DB.Where("user_name = ?", input.User_Name).First(&freelancer)
 	if freelancer.User_Name == input.User_Name {
-		c.JSON(400, gin.H{
-			"error": "This username already exist",
-		})
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "This username already exist",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
@@ -68,26 +86,44 @@ func FreelancerSignup(c *gin.Context) {
 	}
 
 	if !hasNumber || !hasSpecialChar {
-		c.JSON(400, gin.H{
-			"error": "password must have one special charecter and number",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "password must have one special charecter and number",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "password must have one special charecter and number",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	pas, err := helpers.HashPassword(input.Password)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Password hashing error",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Password hashing error",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "password hashing error",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	strOTP := strconv.Itoa(helpers.GenerateOtp())
 
 	if err := helpers.SendOtp(strOTP, input.Email); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to send email",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to send email",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to send email",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
@@ -101,14 +137,26 @@ func FreelancerSignup(c *gin.Context) {
 		Tools:         input.Tools,
 		OTP:           strOTP,
 	}).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to create freelancer",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to create freelancer",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to craete freelancer",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
-	c.JSON(200, gin.H{
-		"success": "email sent to your email",
-	})
+	// c.JSON(200, gin.H{
+	// 	"success": "email sent to your email",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Email sent to your email",
+	}
+	helpers.ResponseResult(c, resp)
 
 }
 
@@ -132,26 +180,50 @@ type OtpVerifiaction struct {
 func ValidateOTP(c *gin.Context) {
 	var input OtpVerifiaction
 	if err := c.Bind(&input); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get data",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to get data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get data",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	var freelancer models.Freelancer
 	if err := database.DB.Where("email = ? AND otp = ?", input.Email, input.Otp).First(&freelancer).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Incorrect user name and otp try again",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Incorrect user name and otp try again",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect username and otp try again",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	if err := database.DB.Model(&models.Freelancer{}).Where("email = ?", input.Email).Update("validate", true).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to update validate",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to update validate",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to update validate",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
-	c.JSON(200, gin.H{"success": "Successfully validate freelancer"})
+	// c.JSON(200, gin.H{"success": "Successfully validate freelancer"})
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully validate freelancer",
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 // Login handles freelancer authentication by validating credentials and generating a JWT token upon successful login.
@@ -169,47 +241,90 @@ func Login(c *gin.Context) {
 	var input models.Login
 
 	if err := c.Bind(&input); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get body",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to get body",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get body",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	var freelancer models.Freelancer
 	if err := database.DB.Where("email = ? OR user_name = ?", input.UserName, input.UserName).
 		First(&freelancer).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Incorrect username and password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Incorrect username and password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect username and password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if !freelancer.Validate && freelancer.IsBlocked {
-		c.JSON(401, gin.H{
-			"error": "Unautharized access",
-		})
+		// c.JSON(401, gin.H{
+		// 	"error": "Unautharized access",
+		// })
+		resp := helpers.Response{
+			StatusCode: 401,
+			Err:        "Unautharized access",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if err := helpers.CheckPassword(freelancer.Password, input.Password); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Incorrect username and password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Incorrect username and password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "INcorrect username and password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	tokenString, err := helpers.GenerateJWT(freelancer.Id)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to generate JWT token",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to generate JWT token",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to generate JWT token",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("freelancer_jwt", tokenString, 3600*24*30, "", "", false, true)
+	// c.SetSameSite(http.SameSiteLaxMode)
+	// c.SetCookie("freelancer_jwt", tokenString, 3600*24*30, "", "", false, true)
 
+	// c.JSON(200, gin.H{
+	// 	"message": "Successfully logged freelancer",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       tokenString,
+	}
+	helpers.ResponseResult(c, resp)
+}
+
+func Logout(c *gin.Context) {
+	c.SetCookie("freelancer_jwt", "", -1, "", "", false, true)
 	c.JSON(200, gin.H{
-		"message": "Successfully logged freelancer",
+		"success": "Successfully logout freelancer",
 	})
 }
 
@@ -237,15 +352,27 @@ func GetProfile(c *gin.Context) {
 
 	var freelancer1 freelancer
 	if err := database.DB.Table("freelancers").Select("full_name,user_name,email,phone,qualification,tools").Where("id = ?", id).Scan(&freelancer1).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get data",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to get data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get data",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"profile": freelancer1,
-	})
+	// c.JSON(200, gin.H{
+	// 	"profile": freelancer1,
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       freelancer1,
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 func ChangePassword(c *gin.Context) {
@@ -254,49 +381,91 @@ func ChangePassword(c *gin.Context) {
 
 	var input models.CPassword
 	if err := c.Bind(&input); err != nil {
-		c.JSON(400, gin.H{
-			"error": "failed to get data",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "failed to get data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get body",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	var freelancer models.Freelancer
 	if err := database.DB.First(&freelancer, id).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find user",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to find user",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find user",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if err := helpers.CheckPassword(freelancer.Password, input.OldPassword); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Incorrect old password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Incorrect old password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect old password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if input.NewPassword != input.ConfirmPassword {
-		c.JSON(400, gin.H{
-			"error": "Incorrect confirm password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Incorrect confirm password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect confirm password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	pswd, err := helpers.HashPassword(input.NewPassword)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to hash password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to hash password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to hash password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if err := database.DB.Model(&models.Freelancer{}).Where("id = ?", id).Update("password", string(pswd)).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to update password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to update password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to update password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"message": "Successfully updated password",
-	})
+	// c.JSON(200, gin.H{
+	// 	"message": "Successfully updated password",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully updated password",
+	}
+	helpers.ResponseResult(c, resp)
 }

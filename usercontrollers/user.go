@@ -238,6 +238,13 @@ func Login(c *gin.Context) {
 	})
 }
 
+func Logout(c *gin.Context) {
+	c.SetCookie("user_token", "", -1, "", "", false, true)
+	c.JSON(200, gin.H{
+		"success": "Successfully logout",
+	})
+}
+
 type bid struct {
 	Description  string `json:"description"`
 	About        string `json:"about"`
@@ -310,4 +317,3 @@ func GetAuctionedBid(c *gin.Context) {
 		"auctions": auctions,
 	})
 }
-
