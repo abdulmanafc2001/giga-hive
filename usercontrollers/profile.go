@@ -22,15 +22,27 @@ func UserProfile(c *gin.Context) {
 	var user userProfile
 	if err := database.DB.Table("users").Select("first_name,last_name,user_name,email,phone").
 		Where("id = ?", id).Scan(&user).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find data",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to find data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find data",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"profile": user,
-	})
+	// c.JSON(200, gin.H{
+	// 	"profile": user,
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       user,
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 func ChangePassword(c *gin.Context) {
@@ -39,50 +51,92 @@ func ChangePassword(c *gin.Context) {
 
 	var input models.CPassword
 	if err := c.Bind(&input); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get body",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to get body",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get body",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	var user models.User
 	if err := database.DB.First(&user, id).Error; err != nil {
-		c.JSON(400, gin.H{
-			"errror": "Failed to get user data",
-		})
+		// c.JSON(400, gin.H{
+		// 	"errror": "Failed to get user data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get user data",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if err := helpers.CheckPassword(user.Password, input.OldPassword); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Incorrect old password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Incorrect old password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect old password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if input.NewPassword != input.ConfirmPassword {
-		c.JSON(400, gin.H{
-			"error": "Incorrect confirm password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Incorrect confirm password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect confirm password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	pswd, err := helpers.HashPassword(input.NewPassword)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to hash password",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to hash password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to hash password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if err := database.DB.Model(&models.User{}).Where("id = ?", id).Update("password", string(pswd)).Error; err != nil {
-		c.JSON(400,gin.H{
-			"error" :"Failed to update password",
-		})
+		// c.JSON(400,gin.H{
+		// 	"error" :"Failed to update password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to update password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"success": "successfully updated password",
-	})
+	// c.JSON(200, gin.H{
+	// 	"success": "successfully updated password",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully updated password",
+	}
+	helpers.ResponseResult(c, resp)
 
 }
