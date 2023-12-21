@@ -1,7 +1,6 @@
 package usercontrollers
 
 import (
-	"net/http"
 	"strconv"
 	"time"
 
@@ -41,9 +40,15 @@ func UserSignup(c *gin.Context) {
 	}
 	// validating the struct with given validate package
 	if err := validate.Struct(input); err != nil {
-		c.JSON(400, gin.H{
-			"error": err.Error(),
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": err.Error(),
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        err.Error(),
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// password validation
@@ -59,43 +64,73 @@ func UserSignup(c *gin.Context) {
 	}
 
 	if !hasNumber || !hasSpecialChar {
-		c.JSON(400, gin.H{
-			"error": "password must have one special charecter and number",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "password must have one special charecter and number",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Password must have one special charecter and number",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// checking the email already have in database
 	var user models.User
 	database.DB.Where("email = ?", input.Email).First(&user)
 	if user.Email == input.Email {
-		c.JSON(400, gin.H{
-			"error": "This email already exist",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "This email already exist",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "This email already exist",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// checking the username already exist in database
 	database.DB.Where("user_name = ?", input.User_Name).First(&user)
 	if user.User_Name == input.User_Name {
-		c.JSON(400, gin.H{
-			"error": "This username already exist",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "This username already exist",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "This username already exist",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// hashing user given password
 	ps, err := helpers.HashPassword(input.Password)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Password hashing error",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Password hashing error",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Password hashing error",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// getting otp
 	otp := helpers.GenerateOtp()
 
 	if err = helpers.SendOtp(strconv.Itoa(otp), input.Email); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to send otp",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to send otp",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to send otp",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// creating the new user
@@ -108,16 +143,28 @@ func UserSignup(c *gin.Context) {
 		Password:   string(ps),
 		Otp:        otp,
 	}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to add data",
-		})
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"error": "Failed to add data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to add data",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// sending the otp to specified email address
 
-	c.JSON(200, gin.H{
-		"success": "otp send to " + input.Email,
-	})
+	// c.JSON(200, gin.H{
+	// 	"success": "otp send to " + input.Email,
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "otp send to " + input.Email,
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 type OtpVerifiaction struct {
@@ -143,38 +190,68 @@ func OtpVerification(c *gin.Context) {
 	// otp and geting from user
 	var otp OtpVerifiaction
 	if err := c.Bind(&otp); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to get data",
-		})
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"error": "Failed to get data",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get body",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	var user models.User
 	if err := database.DB.Where("email = ?", otp.Email).First(&user).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find user",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to find user",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find user",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// checking the user already validate or not.
 	if user.Validate {
-		c.JSON(400, gin.H{
-			"error": "User already verified",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "User already verified",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "User already verified",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// checking the otp correct or not.
 	if otp.Otp != user.Otp {
-		c.JSON(400, gin.H{
-			"error": "Otp verification failed, check your otp",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Otp verification failed, check your otp",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Otp verification failed, check your otp",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// if the otp is correct the value in database validate column is updating to true
 	database.DB.Model(&models.User{}).Where("id = ?", user.Id).Update("validate", true)
-	c.JSON(200, gin.H{
-		"success": "successfully created user",
-	})
+	// c.JSON(200, gin.H{
+	// 	"success": "successfully created user",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully created user",
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 // login function ------------------------------------------------------------------------------>
@@ -193,49 +270,86 @@ func OtpVerification(c *gin.Context) {
 func Login(c *gin.Context) {
 	var input models.Login
 	if err := c.Bind(&input); err != nil {
-		c.JSON(500, gin.H{
-			"error": "Find to get values",
-		})
+		// c.JSON(500, gin.H{
+		// 	"error": "Find to get values",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get body",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	var user models.User
 	if err := database.DB.Where("user_name = ? OR email = ?", input.UserName, input.UserName).First(&user).Error; err != nil {
-		c.JSON(401, gin.H{
-			"error": "incorrect username and password",
-		})
+		// c.JSON(401, gin.H{
+		// 	"error": "incorrect username and password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 401,
+			Err:        "Incorrect Username and password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// checking user status if user is blocked they cannot login
 	if user.IsBlocked {
-		c.JSON(400, gin.H{
-			"error": "User is blocked",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "User is blocked",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "User is blocked",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// checking password if password is wrong it will return error
 	if err := helpers.CheckPassword(user.Password, input.Password); err != nil {
-		c.JSON(401, gin.H{
-			"error": "incorrect username and password",
-		})
+		// c.JSON(401, gin.H{
+		// 	"error": "incorrect username and password",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Incorrect username and password",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// Genetated token using jwt
 	token, err := helpers.GenerateJWT(user.Id)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to generate token",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to generate token",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to generate token",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
-	// seting token into browser
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("user_token", token, 3600*24, "", "", false, true)
 
-	c.JSON(200, gin.H{
-		"success": "Login successfull",
-		"token":   token,
-	})
+	// seting token into browser
+	// c.SetSameSite(http.SameSiteLaxMode)
+	// c.SetCookie("user_token", token, 3600*24, "", "", false, true)
+
+	// c.JSON(200, gin.H{
+	// 	"success": "Login successfull",
+	// 	"token":   token,
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       token,
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 func Logout(c *gin.Context) {
@@ -259,9 +373,15 @@ func CreateBid(c *gin.Context) {
 
 	var input bid
 	if err := c.Bind(&input); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get body",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to get body",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to get body",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
@@ -276,15 +396,27 @@ func CreateBid(c *gin.Context) {
 		User_Id:      id,
 		EndDay:       endDate,
 	}).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to create bid",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to create bid",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to create bid",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"success": "Successfully created new bid",
-	})
+	// c.JSON(200, gin.H{
+	// 	"success": "Successfully created new bid",
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully created new bid",
+	}
+	helpers.ResponseResult(c, resp)
 }
 
 type AuctionDetail struct {
@@ -307,13 +439,25 @@ func GetAuctionedBid(c *gin.Context) {
 	if err := database.DB.Table("auctions").Select("auctions.id,auctions.bid_id,auctions.auction_amount,freelancers.full_name,bids.description,bids.about,bids.price_range,bids.expected_days,bids.end_day").
 		Joins("INNER JOIN freelancers ON freelancers.id=auctions.freelancer_id").
 		Joins("INNER JOIN bids ON bids.id=auctions.bid_id").Where("bids.user_id=?", id).Scan(&auctions).Error; err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to find auctioned datas",
-		})
+		// c.JSON(400, gin.H{
+		// 	"error": "Failed to find auctioned datas",
+		// })
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find auctioned datas",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"auctions": auctions,
-	})
+	// c.JSON(200, gin.H{
+	// 	"auctions": auctions,
+	// })
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       auctions,
+	}
+	helpers.ResponseResult(c, resp)
 }

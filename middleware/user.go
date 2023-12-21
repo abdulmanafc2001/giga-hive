@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,12 +14,10 @@ import (
 )
 
 func UserAuthentication(c *gin.Context) {
-	tokenString, err := c.Cookie("user_token")
-	if err != nil {
-		c.JSON(400, gin.H{
-			"error": "Failed to get token string",
-		})
-		c.Abort()
+	tokenString := c.Request.Header.Get("user_token")
+	if len(tokenString) == 0 {
+		err := errors.New("autharization header not provided")
+		c.AbortWithStatusJSON(http.StatusUnauthorized, err.Error())
 		return
 	}
 
