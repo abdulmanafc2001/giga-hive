@@ -67,6 +67,16 @@ func AuctionForBid(c *gin.Context) {
 		return
 	}
 
+	if auction.AuctionAmount < bid.MinPrice {
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Bid amount is less than minimum bid price",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c,resp)
+		return
+	}
+
 	if err := database.DB.Create(&models.Auction{
 		BidId:         auction.BidId,
 		AuctionAmount: auction.AuctionAmount,
