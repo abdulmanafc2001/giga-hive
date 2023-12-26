@@ -9,8 +9,8 @@ import (
 
 func GenerateJWT(id int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-		"sub":id,
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"sub": id,
 	})
 	return token.SignedString([]byte(os.Getenv("SUPER_SECRET_KEY")))
 }
