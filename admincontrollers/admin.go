@@ -149,9 +149,7 @@ func BlockUser(c *gin.Context) {
 		helpers.ResponseResult(c, resp)
 		return
 	}
-	// c.JSON(200, gin.H{
-	// 	"success": "Successfully blocked user",
-	// })
+	
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
@@ -208,9 +206,7 @@ func UnBlockUser(c *gin.Context) {
 		helpers.ResponseResult(c, resp)
 		return
 	}
-	// c.JSON(200, gin.H{
-	// 	"success": "Successfully unblocked user",
-	// })
+	
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,

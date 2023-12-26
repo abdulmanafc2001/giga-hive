@@ -91,9 +91,7 @@ func AuctionForBid(c *gin.Context) {
 		return
 	}
 
-	// c.JSON(200, gin.H{
-	// 	"success": "successfull auctioned against bid",
-	// })
+	
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,

@@ -22,9 +22,6 @@ func UserProfile(c *gin.Context) {
 	var user userProfile
 	if err := database.DB.Table("users").Select("first_name,last_name,user_name,email,phone").
 		Where("id = ?", id).Scan(&user).Error; err != nil {
-		// c.JSON(400, gin.H{
-		// 	"error": "Failed to find data",
-		// })
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to find data",
@@ -34,9 +31,6 @@ func UserProfile(c *gin.Context) {
 		return
 	}
 
-	// c.JSON(200, gin.H{
-	// 	"profile": user,
-	// })
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
@@ -51,9 +45,6 @@ func ChangePassword(c *gin.Context) {
 
 	var input models.CPassword
 	if err := c.Bind(&input); err != nil {
-		// c.JSON(400, gin.H{
-		// 	"error": "Failed to get body",
-		// })
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to get body",
@@ -64,9 +55,6 @@ func ChangePassword(c *gin.Context) {
 	}
 	var user models.User
 	if err := database.DB.First(&user, id).Error; err != nil {
-		// c.JSON(400, gin.H{
-		// 	"errror": "Failed to get user data",
-		// })
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to get user data",
@@ -77,9 +65,6 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if err := helpers.CheckPassword(user.Password, input.OldPassword); err != nil {
-		// c.JSON(400, gin.H{
-		// 	"error": "Incorrect old password",
-		// })
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Incorrect old password",
@@ -90,9 +75,7 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if input.NewPassword != input.ConfirmPassword {
-		// c.JSON(400, gin.H{
-		// 	"error": "Incorrect confirm password",
-		// })
+	
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Incorrect confirm password",
@@ -104,9 +87,7 @@ func ChangePassword(c *gin.Context) {
 
 	pswd, err := helpers.HashPassword(input.NewPassword)
 	if err != nil {
-		// c.JSON(400, gin.H{
-		// 	"error": "Failed to hash password",
-		// })
+	
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to hash password",
@@ -117,9 +98,7 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if err := database.DB.Model(&models.User{}).Where("id = ?", id).Update("password", string(pswd)).Error; err != nil {
-		// c.JSON(400,gin.H{
-		// 	"error" :"Failed to update password",
-		// })
+		
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to update password",
@@ -129,9 +108,7 @@ func ChangePassword(c *gin.Context) {
 		return
 	}
 
-	// c.JSON(200, gin.H{
-	// 	"success": "successfully updated password",
-	// })
+	
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
