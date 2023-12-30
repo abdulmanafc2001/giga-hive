@@ -24,7 +24,7 @@ func ShowAllBids(c *gin.Context) {
 	var bids []models.Bid
 	current := time.Now()
 	today := current.Format("2006-01-02")
-	if err := database.DB.Where("end_day >= ?", today).Find(&bids).Error; err != nil {
+	if err := database.DB.Where("end_day >= ? AND auctioned = ?", today,false).Find(&bids).Error; err != nil {
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to find all datas",
@@ -98,5 +98,6 @@ func AuctionForBid(c *gin.Context) {
 		Data:       "Successfully auctioned against bid",
 	}
 	helpers.ResponseResult(c, resp)
+
 
 }

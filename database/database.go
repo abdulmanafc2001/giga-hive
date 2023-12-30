@@ -23,5 +23,5 @@ func ConnectToDB() {
 	DB.AutoMigrate(&models.Freelancer{})
 	DB.AutoMigrate(&models.Bid{})
 	DB.AutoMigrate(&models.Auction{})
+	DB.AutoMigrate(&models.AcceptedAuction{})
 }
-

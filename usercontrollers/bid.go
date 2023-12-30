@@ -109,11 +109,58 @@ func AcceptingEffectiveBid(c *gin.Context) {
 		return
 	}
 
-	database.DB.Create(&models.AcceptedAuction{
-		User_Id: usrId,
+	if err := database.DB.Create(&models.AcceptedAuction{
+		Auction_Id:    id,
+		User_Id:       usrId,
 		Freelancer_Id: auction.FreelancerId,
-		Amount: auction.AuctionAmount,
-		Status: "Pending",
-	})
+		Amount:        auction.AuctionAmount,
+		Status:        "Pending",
+		PaymentStatus: "Pending",
+	}).Error; err != nil {
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to add database",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
+		return
+	}
 
+	var auctions []models.Auction
+	if err := database.DB.Where("bid_id = ?", auction.BidId).Find(&auctions).Error; err != nil {
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to find auctions for emailing status",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
+		return
+	}
+
+	for _, auction := range auctions {
+		var freelancer models.Freelancer
+		database.DB.First(&freelancer, auction.FreelancerId)
+		if auction.Id == id {
+			helpers.SuccessEmail(freelancer.Email, true)
+		} else {
+			helpers.SuccessEmail(freelancer.Email, false)
+		}
+	}
+
+	if err := database.DB.Model(&models.Bid{}).Where("id = ?", auction.BidId).Update("auctioned", true).Error; err != nil {
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "Failed to update auctioned boolean",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
+		return
+	}
+
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       "Successfully Accepted auction",
+	}
+	helpers.ResponseResult(c, resp)
 }

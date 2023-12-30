@@ -9,6 +9,7 @@ type Bid struct {
 	ExpectedDays string `json:"expecteddays"`
 	User_Id      int    `json:"userid"`
 	EndDay       string `json:"endday"`
+	Auctioned    bool   `json:"auctioned" gorm:"default:false"`
 }
 
 type Auction struct {
@@ -21,8 +22,10 @@ type Auction struct {
 
 type AcceptedAuction struct {
 	Id            int    `json:"id" gorm:"primaryKey"`
+	Auction_Id    int	`json:"auctionid"`
 	User_Id       int    `json:"userid"`
 	Freelancer_Id int    `json:"freelancerid"`
 	Amount        int    `json:"amount"`
 	Status        string `json:"status"`
+	PaymentStatus string `json:"paymentstatus"`
 }

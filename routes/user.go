@@ -19,5 +19,7 @@ func UserRoutes(router *gin.Engine) {
 
 		r.POST("/bid/createbid", m.UserAuthentication, controllers.CreateBid)
 		r.GET("/bid/auctionedbid", m.UserAuthentication, controllers.GetAuctionedBid)
+
+		r.POST("/bid/acceptauction/:auction_id", m.UserAuthentication, controllers.AcceptingEffectiveBid)
 	}
 }
