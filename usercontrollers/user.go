@@ -2,7 +2,6 @@ package usercontrollers
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/abdulmanafc2001/gigahive/database"
 	"github.com/abdulmanafc2001/gigahive/helpers"
@@ -210,7 +209,7 @@ func OtpVerification(c *gin.Context) {
 	}
 	// if the otp is correct the value in database validate column is updating to true
 	database.DB.Model(&models.User{}).Where("id = ?", user.Id).Update("validate", true)
-	
+
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
@@ -315,85 +314,4 @@ type bid struct {
 	MaxPrice     int    `json:"maxprice"`
 	ExpectedDays string `json:"expecteddays"`
 	EndDay       int    `json:"endday"`
-}
-
-func CreateBid(c *gin.Context) {
-	usr, _ := c.Get("user")
-	id := usr.(models.User).Id
-
-	var input bid
-	if err := c.Bind(&input); err != nil {
-		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get body",
-			Data:       nil,
-		}
-		helpers.ResponseResult(c, resp)
-		return
-	}
-
-	endingDate := time.Now().Add(time.Hour * 24 * time.Duration(input.EndDay))
-	endDate := endingDate.Format("2006-01-02")
-
-	if err := database.DB.Create(&models.Bid{
-		Description:  input.Description,
-		About:        input.About,
-		MinPrice:     input.MinPrice,
-		MaxPrice:     input.MaxPrice,
-		ExpectedDays: input.ExpectedDays,
-		User_Id:      id,
-		EndDay:       endDate,
-	}).Error; err != nil {
-		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to create bid",
-			Data:       nil,
-		}
-		helpers.ResponseResult(c, resp)
-		return
-	}
-
-	resp := helpers.Response{
-		StatusCode: 200,
-		Err:        nil,
-		Data:       "Successfully created new bid",
-	}
-	helpers.ResponseResult(c, resp)
-}
-
-type AuctionDetail struct {
-	Id            int    `json:"id" gorm:"primaryKey"`
-	BidId         int    `json:"bidid"`
-	AuctionAmount int `json:"auctionamount"`
-	Full_Name     string `json:"fullname"`
-	Description   string `json:"description"`
-	About         string `json:"about"`
-	MinPrice     int    `json:"minprice"`
-	MaxPrice     int    `json:"maxprice"`
-	ExpectedDays  string `json:"expecteddays"`
-	EndDay        string `json:"endday"`
-}
-
-func GetAuctionedBid(c *gin.Context) {
-	usr, _ := c.Get("user")
-	id := usr.(models.User).Id
-
-	var auctions []AuctionDetail
-	if err := database.DB.Table("auctions").Select("auctions.id,auctions.bid_id,auctions.auction_amount,freelancers.full_name,bids.description,bids.about,bids.min_price,bids.max_price,bids.expected_days,bids.end_day").
-		Joins("INNER JOIN freelancers ON freelancers.id=auctions.freelancer_id").
-		Joins("INNER JOIN bids ON bids.id=auctions.bid_id").Where("bids.user_id=?", id).Scan(&auctions).Error; err != nil {
-		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find auctioned datas",
-			Data:       nil,
-		}
-		helpers.ResponseResult(c, resp)
-		return
-	}
-	resp := helpers.Response{
-		StatusCode: 200,
-		Err:        nil,
-		Data:       auctions,
-	}
-	helpers.ResponseResult(c, resp)
 }

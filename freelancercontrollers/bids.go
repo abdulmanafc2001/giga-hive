@@ -73,12 +73,13 @@ func AuctionForBid(c *gin.Context) {
 			Err:        "Bid amount is less than minimum bid price",
 			Data:       nil,
 		}
-		helpers.ResponseResult(c,resp)
+		helpers.ResponseResult(c, resp)
 		return
 	}
 
 	if err := database.DB.Create(&models.Auction{
 		BidId:         auction.BidId,
+		User_Id:       bid.User_Id,
 		AuctionAmount: auction.AuctionAmount,
 		FreelancerId:  id,
 	}).Error; err != nil {
@@ -91,7 +92,6 @@ func AuctionForBid(c *gin.Context) {
 		return
 	}
 
-	
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,

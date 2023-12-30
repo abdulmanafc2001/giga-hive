@@ -12,8 +12,17 @@ type Bid struct {
 }
 
 type Auction struct {
-	Id            int    `json:"id" gorm:"primaryKey"`
-	BidId         int    `json:"bidid"`
+	Id            int `json:"id" gorm:"primaryKey"`
+	User_Id       int `json:"userid"`
+	BidId         int `json:"bidid"`
 	AuctionAmount int `json:"auctionamount"`
-	FreelancerId  int    `json:"freelancerid"`
+	FreelancerId  int `json:"freelancerid"`
+}
+
+type AcceptedAuction struct {
+	Id            int    `json:"id" gorm:"primaryKey"`
+	User_Id       int    `json:"userid"`
+	Freelancer_Id int    `json:"freelancerid"`
+	Amount        int    `json:"amount"`
+	Status        string `json:"status"`
 }
