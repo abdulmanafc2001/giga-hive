@@ -32,5 +32,6 @@ func main() {
 	routes.UserRoutes(router)
 	routes.AdminRoutes(router)
 	routes.FreelancerRoutes(router)
+	routes.ChatRoutes(router)
 	router.Run(":7000")
 }
