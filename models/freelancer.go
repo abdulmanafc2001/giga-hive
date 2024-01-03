@@ -9,7 +9,7 @@ type Freelancer struct {
 	Password        string `json:"password" validate:"min=4,max=20"`
 	Qualification   string `json:"qualification"`
 	Tools           string `json:"tools"`
-	Rating          string `json:"rating"`
+	Rating          int    `json:"rating"`
 	NumberOfRatings int    `json:"numberofratings"`
 	OTP             string `json:"otp"`
 	IsBlocked       bool   `json:"isblocked" gorm:"default:false"`

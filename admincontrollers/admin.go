@@ -149,7 +149,7 @@ func BlockUser(c *gin.Context) {
 		helpers.ResponseResult(c, resp)
 		return
 	}
-	
+
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
@@ -206,11 +206,32 @@ func UnBlockUser(c *gin.Context) {
 		helpers.ResponseResult(c, resp)
 		return
 	}
-	
+
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
 		Data:       "Successfully unblocked user",
+	}
+	helpers.ResponseResult(c, resp)
+}
+
+func ListFreelancers(c *gin.Context) {
+	var freelancers []models.Freelancer
+
+	if err := database.DB.Find(&freelancers).Error; err != nil {
+		resp := helpers.Response{
+			StatusCode: 400,
+			Err:        "failed to find freelancers",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
+		return
+	}
+
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       freelancers,
 	}
 	helpers.ResponseResult(c, resp)
 }

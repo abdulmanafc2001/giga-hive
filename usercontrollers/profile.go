@@ -8,6 +8,7 @@ import (
 )
 
 type userProfile struct {
+	Id         int    `json:"id"`
 	First_Name string `json:"firstname" gorm:"not null" validate:"min=4,max=20"`
 	Last_Name  string `json:"lastname" gorm:"not null" validate:"min=4,max=20"`
 	User_Name  string `json:"username" gorm:"not null" validate:"min=4,max=20"`
@@ -20,7 +21,7 @@ func UserProfile(c *gin.Context) {
 	id := usr.(models.User).Id
 
 	var user userProfile
-	if err := database.DB.Table("users").Select("first_name,last_name,user_name,email,phone").
+	if err := database.DB.Table("users").Select("id,first_name,last_name,user_name,email,phone").
 		Where("id = ?", id).Scan(&user).Error; err != nil {
 		resp := helpers.Response{
 			StatusCode: 400,
@@ -75,7 +76,7 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if input.NewPassword != input.ConfirmPassword {
-	
+
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Incorrect confirm password",
@@ -87,7 +88,7 @@ func ChangePassword(c *gin.Context) {
 
 	pswd, err := helpers.HashPassword(input.NewPassword)
 	if err != nil {
-	
+
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to hash password",
@@ -98,7 +99,7 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if err := database.DB.Model(&models.User{}).Where("id = ?", id).Update("password", string(pswd)).Error; err != nil {
-		
+
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        "Failed to update password",
@@ -108,7 +109,6 @@ func ChangePassword(c *gin.Context) {
 		return
 	}
 
-	
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
