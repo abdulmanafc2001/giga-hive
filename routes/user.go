@@ -21,5 +21,7 @@ func UserRoutes(router *gin.Engine) {
 		r.GET("/bid/auctionedbid", m.UserAuthentication, controllers.GetAuctionedBid)
 
 		r.POST("/bid/acceptauction/:auction_id", m.UserAuthentication, controllers.AcceptingEffectiveBid)
+
+		r.GET("/bookingdetails", m.UserAuthentication, controllers.GetBookingDetail)
 	}
 }
