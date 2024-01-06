@@ -25,8 +25,8 @@ func Login(c *gin.Context) {
 	var input models.Login
 	if err := c.Bind(&input); err != nil {
 		resp := helpers.Response{
-			StatusCode: 500,
-			Err:        "Failed to geting data",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -37,7 +37,7 @@ func Login(c *gin.Context) {
 
 	if username != input.UserName || password != input.Password {
 		resp := helpers.Response{
-			StatusCode: 400,
+			StatusCode: 401,
 			Err:        "Incorrect username and password",
 			Data:       nil,
 		}
@@ -48,8 +48,8 @@ func Login(c *gin.Context) {
 	if err != nil {
 
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Token generating error",
+			StatusCode: 500,
+			Err:        "failed to generate token",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -87,8 +87,8 @@ func GetUserList(c *gin.Context) {
 	// fetching all users data from database
 	if err := database.DB.Table("users").Select("id,first_name,last_name,user_name,email,phone,is_blocked,validate").Scan(&users).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find users list",
+			StatusCode: 500,
+			Err:        "internal server error: users list unavailable",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -121,8 +121,8 @@ func BlockUser(c *gin.Context) {
 	user, err := helpers.FindUserById(user_id)
 	if err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find user",
+			StatusCode: 500,
+			Err:        "internal server error: users unavailable",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -131,8 +131,8 @@ func BlockUser(c *gin.Context) {
 
 	if user.IsBlocked {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "user already blocked",
+			StatusCode: 403,
+			Err:        "Account is already blocked for security reasons",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -142,8 +142,8 @@ func BlockUser(c *gin.Context) {
 	if err := database.DB.Model(&models.User{}).Where("id = ?", user_id).
 		Update("is_blocked", "true").Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to Block user",
+			StatusCode: 500,
+			Err:        "Internal server error: unable to block user",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -176,8 +176,8 @@ func UnBlockUser(c *gin.Context) {
 	user, err := helpers.FindUserById(user_id)
 	if err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find user",
+			StatusCode: 500,
+			Err:        "internal server error: users unavailable",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -187,8 +187,8 @@ func UnBlockUser(c *gin.Context) {
 
 	if !user.IsBlocked {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "user already unblocked",
+			StatusCode: 409,
+			Err:        "This user is already unblocked.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -199,8 +199,8 @@ func UnBlockUser(c *gin.Context) {
 		Update("is_blocked", "false").Error; err != nil {
 
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to unblock user",
+			StatusCode: 500,
+			Err:        "internal server error : unable to unblock user ",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -220,8 +220,8 @@ func ListFreelancers(c *gin.Context) {
 
 	if err := database.DB.Find(&freelancers).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "failed to find freelancers",
+			StatusCode: 500,
+			Err:        "failed to retrieve freelancers. Please try again later.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)

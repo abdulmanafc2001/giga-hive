@@ -1,6 +1,7 @@
 package freelancercontrollers
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/abdulmanafc2001/gigahive/database"
@@ -24,10 +25,10 @@ func ShowAllBids(c *gin.Context) {
 	var bids []models.Bid
 	current := time.Now()
 	today := current.Format("2006-01-02")
-	if err := database.DB.Where("end_day >= ? AND auctioned = ?", today,false).Find(&bids).Error; err != nil {
+	if err := database.DB.Where("end_day >= ? AND auctioned = ?", today, false).Find(&bids).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find all datas",
+			StatusCode: 500,
+			Err:        "Failed to retrieve bids from the database. Please try again later.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -48,8 +49,8 @@ func AuctionForBid(c *gin.Context) {
 	var auction models.Auction
 	if err := c.Bind(&auction); err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get body",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON and includes required fields.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -59,8 +60,8 @@ func AuctionForBid(c *gin.Context) {
 	var bid models.Bid
 	if err := database.DB.Find(&bid, auction.BidId).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed find this bid",
+			StatusCode: 500,
+			Err:        "The bid with ID " + strconv.Itoa(auction.BidId) + " was not found. Please verify the ID and try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -70,7 +71,7 @@ func AuctionForBid(c *gin.Context) {
 	if auction.AuctionAmount < bid.MinPrice {
 		resp := helpers.Response{
 			StatusCode: 400,
-			Err:        "Bid amount is less than minimum bid price",
+			Err:        "The bid amount must be at least " + strconv.Itoa(bid.MinPrice) + ". Please enter a valid bid amount that meets or exceeds the minimum.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -84,8 +85,8 @@ func AuctionForBid(c *gin.Context) {
 		FreelancerId:  id,
 	}).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to create auction for bid",
+			StatusCode: 500,
+			Err:        "An error occurred while saving auction data.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -93,11 +94,10 @@ func AuctionForBid(c *gin.Context) {
 	}
 
 	resp := helpers.Response{
-		StatusCode: 200,
+		StatusCode: 201,
 		Err:        nil,
 		Data:       "Successfully auctioned against bid",
 	}
 	helpers.ResponseResult(c, resp)
-
 
 }

@@ -17,8 +17,8 @@ func CreateBid(c *gin.Context) {
 	var input bid
 	if err := c.Bind(&input); err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get body",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -38,8 +38,8 @@ func CreateBid(c *gin.Context) {
 		EndDay:       endDate,
 	}).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to create bid",
+			StatusCode: 500,
+			Err:        "There was a problem creating your bid. Please try again",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -47,7 +47,7 @@ func CreateBid(c *gin.Context) {
 	}
 
 	resp := helpers.Response{
-		StatusCode: 200,
+		StatusCode: 201,
 		Err:        nil,
 		Data:       "Successfully created new bid",
 	}
@@ -56,15 +56,15 @@ func CreateBid(c *gin.Context) {
 
 type AuctionDetail struct {
 	Id            int    `json:"id" gorm:"primaryKey"`
-	BidId         int    `json:"bidid"`
+	BidId         int    `json:"bid_id"`
 	AuctionAmount int    `json:"auctionamount"`
-	Full_Name     string `json:"fullname"`
+	Full_Name     string `json:"full_name"`
 	Description   string `json:"description"`
 	About         string `json:"about"`
-	MinPrice      int    `json:"minprice"`
-	MaxPrice      int    `json:"maxprice"`
-	ExpectedDays  string `json:"expecteddays"`
-	EndDay        string `json:"endday"`
+	MinPrice      int    `json:"min_price"`
+	MaxPrice      int    `json:"max_price"`
+	ExpectedDays  string `json:"expected_days"`
+	EndDay        string `json:"last_day"`
 }
 
 func GetAuctionedBid(c *gin.Context) {
@@ -76,8 +76,8 @@ func GetAuctionedBid(c *gin.Context) {
 		Joins("INNER JOIN freelancers ON freelancers.id=auctions.freelancer_id").
 		Joins("INNER JOIN bids ON bids.id=auctions.bid_id").Where("bids.user_id=?", id).Scan(&auctions).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find auctioned datas",
+			StatusCode: 500,
+			Err:        "There was a problem retrieving the auctioned data",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -101,8 +101,8 @@ func AcceptingEffectiveBid(c *gin.Context) {
 	var auction models.Auction
 	if err := database.DB.Where("user_id = ? AND id = ?", usrId, id).First(&auction).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find this auction",
+			StatusCode: 500,
+			Err:        "The auction you're looking for was not found. Please check the ID and try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -118,8 +118,8 @@ func AcceptingEffectiveBid(c *gin.Context) {
 		PaymentStatus: "Pending",
 	}).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to add database",
+			StatusCode: 500,
+			Err:        "There was a problem accepting the auction. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -129,8 +129,8 @@ func AcceptingEffectiveBid(c *gin.Context) {
 	var auctions []models.Auction
 	if err := database.DB.Where("bid_id = ?", auction.BidId).Find(&auctions).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find auctions for emailing status",
+			StatusCode: 500,
+			Err:        "There was a problem retrieving auctions for emailing. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -149,8 +149,8 @@ func AcceptingEffectiveBid(c *gin.Context) {
 
 	if err := database.DB.Model(&models.Bid{}).Where("id = ?", auction.BidId).Update("auctioned", true).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to update auctioned boolean",
+			StatusCode: 500,
+			Err:        "There was a problem updating the auctioned status",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)

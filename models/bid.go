@@ -8,7 +8,7 @@ type Bid struct {
 	MaxPrice     int    `json:"maxprice"`
 	ExpectedDays string `json:"expecteddays"`
 	User_Id      int    `json:"userid"`
-	EndDay       string `json:"endday"`
+	EndDay       string `json:"last_day"`
 	Auctioned    bool   `json:"auctioned" gorm:"default:false"`
 }
 

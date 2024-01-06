@@ -15,7 +15,7 @@ type BookingDetail struct {
 	Phone         string `json:"phone"`
 	Amount        int    `json:"amount"`
 	Status        string `json:"status"`
-	PaymentStatus string `json:"paymentstatus"`
+	PaymentStatus string `json:"payment_status"`
 }
 
 func GetBookingDetail(c *gin.Context) {
@@ -28,8 +28,8 @@ func GetBookingDetail(c *gin.Context) {
 		Select("accepted_auctions.id,accepted_auctions.auction_id,freelancers.full_name,freelancers.email,freelancers.phone,accepted_auctions.amount,accepted_auctions.status,accepted_auctions.payment_status").
 		Joins("INNER JOIN freelancers ON freelancers.id=accepted_auctions.freelancer_id").Where("accepted_auctions.user_id = ?", usrId).Scan(&bookings).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "failed to get booking details",
+			StatusCode: 500,
+			Err:        "There was a problem retrieving your booking details. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)

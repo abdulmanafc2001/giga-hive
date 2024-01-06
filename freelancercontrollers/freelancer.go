@@ -27,17 +27,16 @@ var validate = validator.New()
 func FreelancerSignup(c *gin.Context) {
 	var input models.Freelancer
 	if err := c.Bind(&input); err != nil {
-		
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get data",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
 		return
 	}
 	if err := validate.Struct(input); err != nil {
-		
+
 		resp := helpers.Response{
 			StatusCode: 400,
 			Err:        err.Error(),
@@ -51,8 +50,8 @@ func FreelancerSignup(c *gin.Context) {
 	database.DB.Where("email = ?", input.Email).First(&freelancer)
 	if freelancer.Email == input.Email {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "This email already exist",
+			StatusCode: 409,
+			Err:        "The email address you entered is already associated with an existing account",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -62,8 +61,8 @@ func FreelancerSignup(c *gin.Context) {
 	database.DB.Where("user_name = ?", input.User_Name).First(&freelancer)
 	if freelancer.User_Name == input.User_Name {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "This username already exist",
+			StatusCode: 409,
+			Err:        "The username address you entered is already associated with an existing account",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -82,10 +81,10 @@ func FreelancerSignup(c *gin.Context) {
 	}
 
 	if !hasNumber || !hasSpecialChar {
-		
+
 		resp := helpers.Response{
 			StatusCode: 400,
-			Err:        "password must have one special charecter and number",
+			Err:        "Password must have at least one number, one special character",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -94,10 +93,10 @@ func FreelancerSignup(c *gin.Context) {
 
 	pas, err := helpers.HashPassword(input.Password)
 	if err != nil {
-	
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "password hashing error",
+			StatusCode: 500,
+			Err:        "An error occurred while processing the password. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -107,10 +106,10 @@ func FreelancerSignup(c *gin.Context) {
 	strOTP := strconv.Itoa(helpers.GenerateOtp())
 
 	if err := helpers.SendOtp(strOTP, input.Email); err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to send email",
+			StatusCode: 500,
+			Err:        "There was a problem sending the email with the OTP. Please check your email address and try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -127,20 +126,20 @@ func FreelancerSignup(c *gin.Context) {
 		Tools:         input.Tools,
 		OTP:           strOTP,
 	}).Error; err != nil {
-	
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to craete freelancer",
+			StatusCode: 500,
+			Err:        "There was a problem creating your freelancer account. Please try again later.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
 		return
 	}
-	
+
 	resp := helpers.Response{
-		StatusCode: 200,
+		StatusCode: 201,
 		Err:        nil,
-		Data:       "Email sent to your email",
+		Data:       "OTP sent to your email address",
 	}
 	helpers.ResponseResult(c, resp)
 
@@ -166,10 +165,9 @@ type OtpVerifiaction struct {
 func ValidateOTP(c *gin.Context) {
 	var input OtpVerifiaction
 	if err := c.Bind(&input); err != nil {
-	
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get data",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -178,20 +176,20 @@ func ValidateOTP(c *gin.Context) {
 
 	var freelancer models.Freelancer
 	if err := database.DB.Where("email = ? AND otp = ?", input.Email, input.Otp).First(&freelancer).Error; err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Incorrect username and otp try again",
+			StatusCode: 401,
+			Err:        "The email and OTP combination is incorrect. Please check your email and OTP carefully and try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
 		return
 	}
 	if err := database.DB.Model(&models.Freelancer{}).Where("email = ?", input.Email).Update("validate", true).Error; err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to update validate",
+			StatusCode: 500,
+			Err:        "There was a problem updating your account validation. Please try again later or contact support.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -199,7 +197,7 @@ func ValidateOTP(c *gin.Context) {
 	}
 
 	resp := helpers.Response{
-		StatusCode: 200,
+		StatusCode: 201,
 		Err:        nil,
 		Data:       "Successfully validate freelancer",
 	}
@@ -221,10 +219,9 @@ func Login(c *gin.Context) {
 	var input models.Login
 
 	if err := c.Bind(&input); err != nil {
-		
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get body",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -233,10 +230,10 @@ func Login(c *gin.Context) {
 	var freelancer models.Freelancer
 	if err := database.DB.Where("email = ? OR user_name = ?", input.UserName, input.UserName).
 		First(&freelancer).Error; err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Incorrect username and password",
+			StatusCode: 401,
+			Err:        "The email or username you entered is incorrect. Please check your credentials and try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -244,10 +241,10 @@ func Login(c *gin.Context) {
 	}
 
 	if !freelancer.Validate && freelancer.IsBlocked {
-		
+
 		resp := helpers.Response{
 			StatusCode: 401,
-			Err:        "Unautharized access",
+			Err:        "Your account is currently blocked. Please contact support for assistance.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -255,10 +252,10 @@ func Login(c *gin.Context) {
 	}
 
 	if err := helpers.CheckPassword(freelancer.Password, input.Password); err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "INcorrect username and password",
+			StatusCode: 401,
+			Err:        "Incorrect username and password",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -267,10 +264,10 @@ func Login(c *gin.Context) {
 
 	tokenString, err := helpers.GenerateJWT(freelancer.Id)
 	if err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to generate JWT token",
+			StatusCode: 500,
+			Err:        "There was a problem processing your request. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -280,7 +277,6 @@ func Login(c *gin.Context) {
 	// c.SetSameSite(http.SameSiteLaxMode)
 	// c.SetCookie("freelancer_jwt", tokenString, 3600*24*30, "", "", false, true)
 
-	
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
@@ -320,16 +316,15 @@ func GetProfile(c *gin.Context) {
 
 	var freelancer1 freelancer
 	if err := database.DB.Table("freelancers").Select("full_name,user_name,email,phone,qualification,tools").Where("id = ?", id).Scan(&freelancer1).Error; err != nil {
-	
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get data",
+			StatusCode: 500,
+			Err:        "There was a problem retrieving the freelancer data. Please try again later ",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
 		return
 	}
-
 
 	resp := helpers.Response{
 		StatusCode: 200,
@@ -345,21 +340,21 @@ func ChangePassword(c *gin.Context) {
 
 	var input models.CPassword
 	if err := c.Bind(&input); err != nil {
-		
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get body",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
 		return
 	}
+	
 	var freelancer models.Freelancer
 	if err := database.DB.First(&freelancer, id).Error; err != nil {
-		
+
 		resp := helpers.Response{
 			StatusCode: 400,
-			Err:        "Failed to find user",
+			Err:        "The freelancer you're looking for was not found.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -367,10 +362,10 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if err := helpers.CheckPassword(freelancer.Password, input.OldPassword); err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Incorrect old password",
+			StatusCode: 401,
+			Err:        "The old password you entered is incorrect. Please try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -378,10 +373,10 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if input.NewPassword != input.ConfirmPassword {
-		
+
 		resp := helpers.Response{
 			StatusCode: 400,
-			Err:        "Incorrect confirm password",
+			Err:        "The passwords you entered don't match. Please check and try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -390,10 +385,10 @@ func ChangePassword(c *gin.Context) {
 
 	pswd, err := helpers.HashPassword(input.NewPassword)
 	if err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to hash password",
+			StatusCode: 500,
+			Err:        "There was a problem processing your request. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -401,10 +396,10 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	if err := database.DB.Model(&models.Freelancer{}).Where("id = ?", id).Update("password", string(pswd)).Error; err != nil {
-		
+
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to update password",
+			StatusCode: 500,
+			Err:        "There was a problem updating your password. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -414,7 +409,7 @@ func ChangePassword(c *gin.Context) {
 	resp := helpers.Response{
 		StatusCode: 200,
 		Err:        nil,
-		Data:       "Successfully updated password",
+		Data:       "Successfully updated your password",
 	}
 	helpers.ResponseResult(c, resp)
 }

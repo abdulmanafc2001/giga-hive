@@ -32,9 +32,12 @@ var (
 func UserSignup(c *gin.Context) {
 	var input models.User
 	if err := c.Bind(&input); err != nil {
-		c.JSON(500, gin.H{
-			"error": "Failed to get data",
-		})
+		resp := helpers.Response{
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
 		return
 	}
 	// validating the struct with given validate package
@@ -62,7 +65,7 @@ func UserSignup(c *gin.Context) {
 	if !hasNumber || !hasSpecialChar {
 		resp := helpers.Response{
 			StatusCode: 400,
-			Err:        "Password must have one special charecter and number",
+			Err:        "Password must contain at least one number and one special character.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -73,8 +76,8 @@ func UserSignup(c *gin.Context) {
 	database.DB.Where("email = ?", input.Email).First(&user)
 	if user.Email == input.Email {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "This email already exist",
+			StatusCode: 409,
+			Err:        "An account with this email already exists",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -85,7 +88,7 @@ func UserSignup(c *gin.Context) {
 	if user.User_Name == input.User_Name {
 		resp := helpers.Response{
 			StatusCode: 400,
-			Err:        "This username already exist",
+			Err:        "An account with this username already exists",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -95,8 +98,8 @@ func UserSignup(c *gin.Context) {
 	ps, err := helpers.HashPassword(input.Password)
 	if err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Password hashing error",
+			StatusCode: 500,
+			Err:        "There was a problem processing your request. Please try again later.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -107,8 +110,8 @@ func UserSignup(c *gin.Context) {
 
 	if err = helpers.SendOtp(strconv.Itoa(otp), input.Email); err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to send otp",
+			StatusCode: 500,
+			Err:        "There was a problem sending the OTP. Please try again later",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -124,12 +127,9 @@ func UserSignup(c *gin.Context) {
 		Password:   string(ps),
 		Otp:        otp,
 	}).Error; err != nil {
-		// c.JSON(http.StatusInternalServerError, gin.H{
-		// 	"error": "Failed to add data",
-		// })
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to add data",
+			StatusCode: 500,
+			Err:        "There was a problem creating your account. Please try again later.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -169,8 +169,8 @@ func OtpVerification(c *gin.Context) {
 	var otp OtpVerifiaction
 	if err := c.Bind(&otp); err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get body",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -180,8 +180,8 @@ func OtpVerification(c *gin.Context) {
 	var user models.User
 	if err := database.DB.Where("email = ?", otp.Email).First(&user).Error; err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to find user",
+			StatusCode: 404,
+			Err:        "User not found",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -190,8 +190,8 @@ func OtpVerification(c *gin.Context) {
 	// checking the user already validate or not.
 	if user.Validate {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "User already verified",
+			StatusCode: 409,
+			Err:        "User is already verified. Please log in directly",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -201,7 +201,7 @@ func OtpVerification(c *gin.Context) {
 	if otp.Otp != user.Otp {
 		resp := helpers.Response{
 			StatusCode: 400,
-			Err:        "Otp verification failed, check your otp",
+			Err:        "Invalid OTP entered. Please check your OTP and try again.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -234,12 +234,9 @@ func OtpVerification(c *gin.Context) {
 func Login(c *gin.Context) {
 	var input models.Login
 	if err := c.Bind(&input); err != nil {
-		// c.JSON(500, gin.H{
-		// 	"error": "Find to get values",
-		// })
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to get body",
+			StatusCode: 422,
+			Err:        "failed to parse request body. Please ensure it's valid JSON",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -259,8 +256,8 @@ func Login(c *gin.Context) {
 	// checking user status if user is blocked they cannot login
 	if user.IsBlocked {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "User is blocked",
+			StatusCode: 403,
+			Err:        "Your account has been blocked.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
@@ -269,7 +266,7 @@ func Login(c *gin.Context) {
 	// checking password if password is wrong it will return error
 	if err := helpers.CheckPassword(user.Password, input.Password); err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
+			StatusCode: 401,
 			Err:        "Incorrect username and password",
 			Data:       nil,
 		}
@@ -280,8 +277,8 @@ func Login(c *gin.Context) {
 	token, err := helpers.GenerateJWT(user.Id)
 	if err != nil {
 		resp := helpers.Response{
-			StatusCode: 400,
-			Err:        "Failed to generate token",
+			StatusCode: 500,
+			Err:        "There was a problem processing your request.",
 			Data:       nil,
 		}
 		helpers.ResponseResult(c, resp)
