@@ -304,11 +304,4 @@ func Logout(c *gin.Context) {
 	})
 }
 
-type bid struct {
-	Description  string `json:"description"`
-	About        string `json:"about"`
-	MinPrice     int    `json:"minprice"`
-	MaxPrice     int    `json:"maxprice"`
-	ExpectedDays string `json:"expecteddays"`
-	EndDay       int    `json:"endday"`
-}
+

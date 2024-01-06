@@ -10,6 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
+type bid struct {
+	Description  string `json:"description"`
+	About        string `json:"about"`
+	MinPrice     int    `json:"minprice"`
+	MaxPrice     int    `json:"maxprice"`
+	ExpectedDays string `json:"expecteddays"`
+	EndDay       int    `json:"endday"`
+}
+
 func CreateBid(c *gin.Context) {
 	usr, _ := c.Get("user")
 	id := usr.(models.User).Id
