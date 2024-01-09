@@ -14,4 +14,5 @@ func AdminRoutes(router *gin.Engine) {
 	r.GET("/freelancer/list", m.AdminAuthentication, controllers.ListFreelancers)
 	r.PATCH("/user/block", m.AdminAuthentication, controllers.BlockUser)
 	r.PATCH("/user/unblock", m.AdminAuthentication, controllers.UnBlockUser)
+	r.GET("/revenue", m.AdminAuthentication, controllers.RevenueDetails)
 }

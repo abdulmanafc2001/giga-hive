@@ -235,3 +235,25 @@ func ListFreelancers(c *gin.Context) {
 	}
 	helpers.ResponseResult(c, resp)
 }
+
+func RevenueDetails(c *gin.Context) {
+	var price int
+	if err := database.DB.Table("accepted_auctions").Select("SUM(amount)").Where("payment_status = ?", "Completed").Scan(&price).Error; err != nil {
+		resp := helpers.Response{
+			StatusCode: 500,
+			Err:        "No completed auctions found",
+			Data:       nil,
+		}
+		helpers.ResponseResult(c, resp)
+		return
+	}
+
+	adminShare := price * 30 / 100
+
+	resp := helpers.Response{
+		StatusCode: 200,
+		Err:        nil,
+		Data:       adminShare,
+	}
+	helpers.ResponseResult(c, resp)
+}

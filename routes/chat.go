@@ -13,5 +13,4 @@ func ChatRoutes(r *gin.Engine) {
 	r.GET("/ws", handlers.WsEndPoint)
 
 	r.Static("/static", "./static")
-
 }

@@ -22,7 +22,7 @@ type Auction struct {
 
 type AcceptedAuction struct {
 	Id            int    `json:"id" gorm:"primaryKey"`
-	Auction_Id    int	`json:"auctionid"`
+	Auction_Id    int    `json:"auctionid"`
 	User_Id       int    `json:"userid"`
 	Freelancer_Id int    `json:"freelancerid"`
 	Amount        int    `json:"amount"`
