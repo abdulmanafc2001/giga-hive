@@ -9,7 +9,10 @@ require (
 	gorm.io/gorm v1.25.5
 )
 
+require github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
+
 require (
+	github.com/CloudyKit/jet/v6 v6.2.0
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.2.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect

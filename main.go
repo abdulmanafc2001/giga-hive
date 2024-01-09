@@ -5,6 +5,7 @@ import (
 
 	"github.com/abdulmanafc2001/gigahive/database"
 	_ "github.com/abdulmanafc2001/gigahive/docs"
+	"github.com/abdulmanafc2001/gigahive/handlers"
 	"github.com/abdulmanafc2001/gigahive/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -33,5 +34,6 @@ func main() {
 	routes.AdminRoutes(router)
 	routes.FreelancerRoutes(router)
 	routes.ChatRoutes(router)
+	go handlers.ListenToWsChannel()
 	router.Run(":7000")
 }

@@ -19,7 +19,7 @@ func FreelancerRoutes(router *gin.Engine) {
 
 		r.GET("/bid/showallbid", m.FreelancerAuthentication, controllers.ShowAllBids)
 		r.POST("/bid/auction", m.FreelancerAuthentication, controllers.AuctionForBid)
-		r.PUT("/auction/changestatus", m.FreelancerAuthentication, controllers.ChangeAcceptedAuctionStatus)
+		r.PATCH("/auction/changestatus", m.FreelancerAuthentication, controllers.ChangeAcceptedAuctionStatus)
 
 		r.GET("/bookingdetails", m.FreelancerAuthentication, controllers.GetBookingDetail)
 	}
