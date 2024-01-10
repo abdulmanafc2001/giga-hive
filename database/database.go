@@ -24,4 +24,5 @@ func ConnectToDB() {
 	DB.AutoMigrate(&models.Bid{})
 	DB.AutoMigrate(&models.Auction{})
 	DB.AutoMigrate(&models.AcceptedAuction{})
+	DB.AutoMigrate(&models.RazorPay{})
 }

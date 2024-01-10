@@ -7,6 +7,7 @@ import (
 )
 
 func UserRoutes(router *gin.Engine) {
+	router.LoadHTMLGlob("templates/*.html")
 	r := router.Group("/user")
 	{
 		r.POST("/signup", controllers.UserSignup)
@@ -23,5 +24,11 @@ func UserRoutes(router *gin.Engine) {
 		r.POST("/bid/acceptauction/:auction_id", m.UserAuthentication, controllers.AcceptingEffectiveBid)
 
 		r.GET("/bookingdetails", m.UserAuthentication, controllers.GetBookingDetail)
+
+
+		r.GET("/razorpay/:auction_id", controllers.RazorPay)
+		r.GET("/payment/success", controllers.SuccessPayment)
+
+		r.GET("/success",controllers.Success)
 	}
 }

@@ -17,7 +17,7 @@ type bid struct {
 	MinPrice     int    `json:"minprice"`
 	MaxPrice     int    `json:"maxprice"`
 	ExpectedDays string `json:"expecteddays"`
-	EndDay       int    `json:"endday"`
+	EndDay       int    `json:"last_day"`
 }
 
 func CreateBid(c *gin.Context) {
